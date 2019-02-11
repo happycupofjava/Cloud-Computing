@@ -1,0 +1,28 @@
+AIM: The purpose of this project is to develop a graph analysis program using Apache Spark.
+
+Implement Graph Processing using Spark and Scala. You should modify Partition.scala only. Your main program should take the text file that contains the graph (small-graph.txt or large-graph.txt) as an argument.
+
+The graph can be represented as RDD[ ( Long, Long, List[Long] ) ], where the first Long is the graph node ID, the second Long is the assigned cluster ID (-1 if the node has not been assigned yet), and the List[Long] is the adjacent list (the IDs of the neighbors). Here is the pseudo-code:
+
+var graph = /* read graph from args(0); the graph cluster ID is set to -1 except for the first 5 nodes */
+
+for (i <- 1 to depth)
+   graph = graph.flatMap{ /* (1) */ }.groupByKey.map{ /* (2) */ }
+
+/* finally, print partition sizes */
+
+where the mapper function (1) returns two kinds of tuples from a node ( id, cluster, adjacent) in the graph:
+
+    ( id, Left(cluster,adjacent) ) (ie, pass the graph topology)
+    ( x, Right(cluster) ) for each neighbor x in adjacent if cluster is greater than -1. 
+
+Then, the reducer function (2) takes a tuple ( Long, Iterable[Either[(Long,List[Long]),Long]] ) from groupByKey and returns a graph node (Long,Long,List[Long]) using the following pseudo-code:
+
+reducer_function ( id, s ):
+  adjacent = Nil
+  cluster = -1
+  for each p in s:
+     if p matches Right(c) then cluster = c
+     if p matches Left(c,adj) where c>0 then return (id,c,adj)   /* the node has already been assigned a cluster */
+     if p matches Left(-1,adj) then adjacent = adj
+  return ( id, cluster, adjacent )
