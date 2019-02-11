@@ -1,0 +1,14 @@
+Aim:  The purpose of this project is to develop a data analysis program using Apache Spark.
+
+Implement KMeans clustering using Spark and Scala. The main program should take two arguments: the text file that contains the points (points-small.txt or points-large.txt) and the centroids.txt file. The resulting centroids will be written to the output. This time, the process of finding new centroids from previous centroids using KMeans must be repeated 5 times. Note: you need to broadcast the centroids to worker nodes using the Spark broadcast method:
+
+    centroids = /* initial centroids from the file centroids.txt */
+
+    for ( i <- 1 to 5 ) {
+       val cs = sc.broadcast(centroids)
+       centroids = points.map { p => (cs.value.minBy(distance(p,_)), p) }
+                         .groupByKey().map { /* ... calculate a new centroid ... */ }
+
+    }
+
+where distance(x,y) calculates the distance between two points x and y. 
